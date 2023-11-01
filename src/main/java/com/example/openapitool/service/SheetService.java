@@ -37,8 +37,8 @@ public class SheetService {
     @Value("classpath:templates/api-spec-template.xlsx")
     Resource dafaultTemplateResource;
 
-    @Value("classpath:templates/api-spec-template-hes.xlsx")
-    Resource hesTemplateResource;
+    @Value("classpath:templates/api-spec-template-simple.xlsx")
+    Resource simpleTemplateResource;
 
     @SneakyThrows
     public void convertOpenApiToSheet(TemplateType templateType, byte[] openApiBytes, OutputStream outputStream) {
@@ -71,7 +71,7 @@ public class SheetService {
         }
         return switch (templateType) {
             case DEFAULT -> dafaultTemplateResource;
-            case HES -> hesTemplateResource;
+            case SIMPLE -> simpleTemplateResource;
         };
     }
 
