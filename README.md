@@ -10,7 +10,10 @@
 
 - templateType: 輸出的模板種類
 - openApi: 上傳 open api 3.0 的文字檔 (支援 json, yaml 格式)
-  - 範例檔案：resources/templates/test_files/open-api.json
+
+範例檔案：resources/templates/test_files/open-api.json
+
+<img src="https://github.com/PinXian53/open-api-tool/blob/main/image/open-api.png" alt="image">
 
 執行後，產生的 excel 如下
 
