@@ -179,6 +179,7 @@ public class SheetService {
         return parameters.stream().map(parameter -> {
             var requestParameter = new RequestParameter();
             requestParameter.setLevel(parameter.getLevel());
+            requestParameter.setLevelValue(getLevelValue(parameter.getLevel()));
             requestParameter.setName(parameter.getName());
             requestParameter.setType(parameter.getType());
             requestParameter.setMaxLength(parameter.getMaxLength());
@@ -195,6 +196,7 @@ public class SheetService {
         return parameters.stream().map(parameter -> {
             var responseParameter = new ResponseParameter();
             responseParameter.setLevel(parameter.getLevel());
+            responseParameter.setLevelValue(getLevelValue(parameter.getLevel()));
             responseParameter.setName(parameter.getName());
             responseParameter.setType(parameter.getType());
             responseParameter.setMaxLength(parameter.getMaxLength());
@@ -288,4 +290,10 @@ public class SheetService {
         return bool ? "Y" : "N";
     }
 
+    private String getLevelValue(Integer level) {
+        if (level == null) {
+            return null;
+        }
+        return StringUtils.repeat("　", level - 1) + level;
+    }
 }
