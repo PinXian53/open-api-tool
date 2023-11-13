@@ -42,7 +42,13 @@ public class SheetService {
 
     @SneakyThrows
     public void convertOpenApiToSheet(TemplateType templateType, byte[] openApiBytes, OutputStream outputStream) {
-        var content = readJsonContent(openApiBytes);
+        var content = readFileContent(openApiBytes);
+        convertOpenApiToSheet(templateType, content, outputStream);
+    }
+
+    @SneakyThrows
+    public void convertOpenApiToSheet(TemplateType templateType, String openApiContent, OutputStream outputStream) {
+        var content = readJsonContent(openApiContent);
         var openApiDoc = openApiSpecService.getOpenApiDoc(content);
         var sheetParameters = convertToSheetParameter(openApiDoc);
         // 輸出到 excel
@@ -54,14 +60,18 @@ public class SheetService {
     }
 
     @SneakyThrows
-    private String readJsonContent(byte[] txtBytes) {
+    private String readFileContent(byte[] txtBytes) {
         var tmpFile = Paths.get(FileUtils.getTempDirectory().getPath(), UUID.randomUUID().toString()).toFile();
         FileUtils.writeByteArrayToFile(tmpFile, txtBytes);
         var content = FileUtils.readFileToString(tmpFile, StandardCharsets.UTF_8);
+        tmpFile.delete();
+        return content;
+    }
+
+    private String readJsonContent(String content) {
         if (!JsonUtils.isJson(content)) {
             content = YamlUtils.convertYamlToJson(content);
         }
-        tmpFile.delete();
         return content;
     }
 
@@ -271,7 +281,7 @@ public class SheetService {
         }
     }
 
-    private int getLevel(String sequence){
+    private int getLevel(String sequence) {
         return sequence.split("\\.").length;
     }
 

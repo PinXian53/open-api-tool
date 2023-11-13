@@ -50,6 +50,8 @@ dependencies {
     implementation 'org.jxls:jxls-poi:2.13.0'
     implementation 'org.jxls:jxls-jexcel:1.0.9'
 
+    // okhttp3
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 }
 
 tasks.named('test') {
