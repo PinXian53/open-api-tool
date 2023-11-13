@@ -221,9 +221,9 @@ public class SheetService {
         var allowValue = parameter.getEnumValues().stream().map(Object::toString)
             .collect(Collectors.joining(","));
         if (StringUtils.isEmpty(description)) {
-            return "allowableValues: %s".formatted(allowValue);
+            return "allowable values: %s".formatted(allowValue);
         }
-        return "%s (allowableValues: %s)".formatted(description, allowValue);
+        return "%s (allowable values: %s)".formatted(description, allowValue);
     }
 
     private String getDefaultExampleFromRequest(List<RequestParameter> parameters) {
