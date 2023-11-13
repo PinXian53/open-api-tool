@@ -6,8 +6,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class PayloadParameter {
-    Integer level;
-    String levelValue;
+    String sequence;
     String name;
     String type;
     Integer maxLength;

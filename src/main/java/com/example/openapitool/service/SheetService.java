@@ -178,8 +178,7 @@ public class SheetService {
         }
         return parameters.stream().map(parameter -> {
             var requestParameter = new RequestParameter();
-            requestParameter.setLevel(parameter.getLevel());
-            requestParameter.setLevelValue(getLevelValue(parameter.getLevel()));
+            requestParameter.setSequence(parameter.getSequence());
             requestParameter.setName(parameter.getName());
             requestParameter.setType(parameter.getType());
             requestParameter.setMaxLength(parameter.getMaxLength());
@@ -195,8 +194,7 @@ public class SheetService {
         }
         return parameters.stream().map(parameter -> {
             var responseParameter = new ResponseParameter();
-            responseParameter.setLevel(parameter.getLevel());
-            responseParameter.setLevelValue(getLevelValue(parameter.getLevel()));
+            responseParameter.setSequence(parameter.getSequence());
             responseParameter.setName(parameter.getName());
             responseParameter.setType(parameter.getType());
             responseParameter.setMaxLength(parameter.getMaxLength());
@@ -260,7 +258,7 @@ public class SheetService {
                     case "object" -> new LinkedHashMap<String, Object>();
                     default -> throw new IllegalStateException("Unexpected value: " + type);
                 };
-                var level = parameter.getLevel();
+                var level = getLevel(parameter.getSequence());
                 if (type.equals("object")) {
                     tmpLevelMap.put(level + 1, (LinkedHashMap<String, Object>) value);
                 }
@@ -271,6 +269,10 @@ public class SheetService {
             log.warn(e.getMessage(), e);
             return null;
         }
+    }
+
+    private int getLevel(String sequence){
+        return sequence.split("\\.").length;
     }
 
     private boolean isArray(String type) {
@@ -290,10 +292,4 @@ public class SheetService {
         return bool ? "Y" : "N";
     }
 
-    private String getLevelValue(Integer level) {
-        if (level == null) {
-            return null;
-        }
-        return StringUtils.repeat("　", level - 1) + level;
-    }
 }

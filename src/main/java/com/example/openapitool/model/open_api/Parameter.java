@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @Data
 public class Parameter {
-    Integer level;
+    String sequence;
     String name;
     String type;
     String description;

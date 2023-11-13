@@ -92,7 +92,7 @@ public class OpenApiSpecService {
                 var request = new RequestPayload();
                 request.setMediaType(mediaType);
                 request.setRef(ref);
-                request.setParameters(getPayloadParameter(ref, null, 1, context));
+                request.setParameters(getPayloadParameter(ref, null, null, context));
                 setRequestPayloadExample(request, examples);
                 requestPayloads.add(request);
             });
@@ -121,7 +121,6 @@ public class OpenApiSpecService {
                 }
 
                 var parameter = new Parameter();
-                parameter.setLevel(null);
                 parameter.setName(name);
                 parameter.setType(type);
                 parameter.setDescription(description);
@@ -169,7 +168,7 @@ public class OpenApiSpecService {
                         response.setMediaType(mediaType);
                         response.setHttpCode(status);
                         response.setRef(ref);
-                        response.setParameters(getPayloadParameter(ref, null, 1, context));
+                        response.setParameters(getPayloadParameter(ref, null, null, context));
                         responseList.add(response);
                     });
                 } else {
@@ -199,7 +198,11 @@ public class OpenApiSpecService {
         requestPayload.setPayloadExamples(payloadExamples);
     }
 
-    private List<Parameter> getPayloadParameter(String ref, String parentRef, int level, DocumentContext context) {
+    private List<Parameter> getPayloadParameter(
+        String ref,
+        String parentRef,
+        String parentSeq,
+        DocumentContext context) {
         if (ref == null || ref.equals(parentRef)) {
             // ref 等於 parentRef 就跳過，避免無限迴圈造成 StackOverflowError
             return Collections.emptyList();
@@ -216,7 +219,11 @@ public class OpenApiSpecService {
             return Collections.emptyList();
         }
 
-        properties.forEach((fieldName, property) -> {
+        int index = 1;
+
+        for (Map.Entry<String, LinkedHashMap<String, ?>> entry : properties.entrySet()) {
+            String fieldName = entry.getKey();
+            LinkedHashMap<String, ?> property = entry.getValue();
             var subRef = (String) property.get("$ref");
             var description = (String) property.get("description");
             var type = (String) property.get("type");
@@ -247,6 +254,8 @@ public class OpenApiSpecService {
                 }
             }
 
+            var seq = getSeq(parentSeq, index);
+
             if (subRef == null) {
                 var format = (String) property.get("format");
 
@@ -254,7 +263,7 @@ public class OpenApiSpecService {
                     type = "%s($%s)".formatted(type, format);
                 }
                 var parameter = new Parameter();
-                parameter.setLevel(level);
+                parameter.setSequence(seq);
                 parameter.setName(fieldName);
                 parameter.setType(type);
                 parameter.setDescription(description);
@@ -264,18 +273,25 @@ public class OpenApiSpecService {
                 parameterList.add(parameter);
             } else {
                 var parameter = new Parameter();
-                parameter.setLevel(level);
+                parameter.setSequence(seq);
                 parameter.setName(fieldName);
                 parameter.setType(type);
                 parameter.setDescription(description);
                 parameter.setRequired(required);
                 parameter.setExample(example);
                 parameterList.add(parameter);
-                parameterList.addAll(getPayloadParameter(subRef, ref, level + 1, context));
+                parameterList.addAll(getPayloadParameter(subRef, ref, seq, context));
             }
-
-        });
+            index++;
+        }
         return parameterList;
+    }
+
+    private String getSeq(String parentSeq, int index) {
+        if (parentSeq == null) {
+            return String.valueOf(index);
+        }
+        return "%s.%s".formatted(parentSeq, index);
     }
 
     private RefEnum getRefEnum(String ref, DocumentContext context) {
