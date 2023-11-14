@@ -135,6 +135,11 @@ public class OpenApiSpecService {
                     type = "array[%s]".formatted(itemsType);
                 }
 
+                var format = (String) schema.get("format");
+                if (format != null) {
+                    type = "%s($%s)".formatted(type, format);
+                }
+
                 var parameter = new Parameter();
                 parameter.setName(name);
                 parameter.setType(type);
