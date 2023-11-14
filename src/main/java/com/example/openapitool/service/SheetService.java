@@ -202,6 +202,7 @@ public class SheetService {
             requestParameter.setMaxLength(parameter.getMaxLength());
             requestParameter.setRequired(toYN(parameter.getRequired()));
             requestParameter.setDescription(getDescription(parameter));
+            requestParameter.setEnumValues(parameter.getEnumValues());
             return requestParameter;
         }).toList();
     }
@@ -217,6 +218,7 @@ public class SheetService {
             responseParameter.setType(parameter.getType());
             responseParameter.setMaxLength(parameter.getMaxLength());
             responseParameter.setDescription(getDescription(parameter));
+            responseParameter.setEnumValues(parameter.getEnumValues());
             return responseParameter;
         }).toList();
     }
@@ -265,17 +267,7 @@ public class SheetService {
                 if (isArray) {
                     type = getArrayType(type);
                 }
-                // 目前只列出有用到的類型，後續可依需求擴充
-                var value = switch (type) {
-                    case "string", "string($byte)", "string($binary)" -> "string";
-                    case "string($date)" -> "2023-12-31";
-                    case "string($date-time)" -> "2023-12-31T00:00:00.000Z";
-                    case "number", "number($bigdecimal)" -> 1;
-                    case "integer", "integer($int32)", "integer($int64)" -> 0;
-                    case "boolean" -> true;
-                    case "object" -> new LinkedHashMap<String, Object>();
-                    default -> throw new IllegalStateException("Unexpected value: " + type);
-                };
+                var value = getExampleValue(parameter, type);
                 var level = getLevel(parameter.getSequence());
                 if (type.equals("object")) {
                     tmpLevelMap.put(level + 1, (LinkedHashMap<String, Object>) value);
@@ -287,6 +279,26 @@ public class SheetService {
             log.warn(e.getMessage(), e);
             return null;
         }
+    }
+
+    private static Object getExampleValue(PayloadParameter parameter, String type) {
+        Object value;
+        if(!CollectionUtils.isEmpty(parameter.getEnumValues())){
+            value = parameter.getEnumValues().get(0);
+        }else {
+            // 目前只列出有用到的類型，後續可依需求擴充
+            value = switch (type) {
+                case "string", "string($byte)", "string($binary)" -> "string";
+                case "string($date)" -> "2023-12-31";
+                case "string($date-time)" -> "2023-12-31T00:00:00.000Z";
+                case "number", "number($bigdecimal)" -> 1;
+                case "integer", "integer($int32)", "integer($int64)" -> 0;
+                case "boolean" -> true;
+                case "object" -> new LinkedHashMap<String, Object>();
+                default -> throw new IllegalStateException("Unexpected value: " + type);
+            };
+        }
+        return value;
     }
 
     private int getLevel(String sequence) {
