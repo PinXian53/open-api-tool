@@ -164,14 +164,14 @@ public class SheetService {
         }
 
         var requestsHeaderParameters = api.getRequestsHeaderParameters();
-        if (!CollectionUtils.isEmpty(requestsPathParameters)) {
+        if (!CollectionUtils.isEmpty(requestsHeaderParameters)) {
             requestsHeaderParameters.forEach(pathParameter ->
                 otherParameterList.add(toOtherParameter("header", pathParameter))
             );
         }
 
         var requestsQueryParameters = api.getRequestsQueryParameters();
-        if (!CollectionUtils.isEmpty(requestsPathParameters)) {
+        if (!CollectionUtils.isEmpty(requestsQueryParameters)) {
             requestsQueryParameters.forEach(pathParameter ->
                 otherParameterList.add(toOtherParameter("query", pathParameter))
             );
