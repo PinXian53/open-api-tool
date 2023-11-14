@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jxls.common.Context;
 import org.jxls.util.JxlsHelper;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,23 +91,27 @@ public class SheetService {
         int index = 1;
         for (Group group : openApiDoc.getGroups()) {
             for (Api api : group.getApis()) {
-                var otherParameterList = getOtherParameters(api);
-                var sheetParameter = new SheetParameter();
-                sheetParameter.setIndex(index);
-                sheetParameter.setPath(api.getPath());
-                sheetParameter.setSummary(api.getSummary());
-                sheetParameter.setHttpMethod(api.getHttpMethod());
-                sheetParameter.setContentType("application/json");
-                sheetParameter.setMemo(BooleanUtils.isTrue(api.getDeprecated()) ? "deprecated" : null);
-                sheetParameter.setOtherParameters(otherParameterList);
-                setRequestParametersAndExample(sheetParameter, api.getRequestPayloads());
-                setResponseParametersAndExample(sheetParameter, api.getResponsePayloads());
-                setShow(sheetParameter);
-                sheetParameterList.add(sheetParameter);
+                sheetParameterList.add(getSheetParameter(index, api));
                 index++;
             }
         }
         return sheetParameterList;
+    }
+
+    private SheetParameter getSheetParameter(int index, Api api) {
+        var otherParameterList = getOtherParameters(api);
+        var sheetParameter = new SheetParameter();
+        sheetParameter.setIndex(index);
+        sheetParameter.setPath(api.getPath());
+        sheetParameter.setSummary(api.getSummary());
+        sheetParameter.setHttpMethod(api.getHttpMethod());
+        sheetParameter.setContentType("application/json");
+        sheetParameter.setMemo(BooleanUtils.isTrue(api.getDeprecated()) ? "deprecated" : null);
+        sheetParameter.setOtherParameters(otherParameterList);
+        setRequestParametersAndExample(sheetParameter, api.getRequestPayloads());
+        setResponseParametersAndExample(sheetParameter, api.getResponsePayloads());
+        setShow(sheetParameter);
+        return sheetParameter;
     }
 
     private void setRequestParametersAndExample(SheetParameter sheetParameter, List<RequestPayload> requestPayloads) {
