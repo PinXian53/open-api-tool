@@ -61,7 +61,7 @@ public class OpenApiSpecService {
                 api.setPath(path);
                 api.setSummary(summary);
                 api.setDeprecated(deprecated);
-                setRequestParameters(api, requestParameters);
+                setRequestParameters(api, requestParameters, context);
                 setRequestPayloads(api, requestBody, context);
                 setResponsePayloads(api, responses, context);
 
@@ -100,7 +100,7 @@ public class OpenApiSpecService {
         }
     }
 
-    private void setRequestParameters(Api api, List<LinkedHashMap<?, ?>> requestParameters) {
+    private void setRequestParameters(Api api, List<LinkedHashMap<?, ?>> requestParameters, DocumentContext context) {
         if (requestParameters != null) {
             var requestHeaderList = new ArrayList<Parameter>();
             var requestPathList = new ArrayList<Parameter>();
@@ -113,10 +113,25 @@ public class OpenApiSpecService {
                 var schema = (LinkedHashMap<?, ?>) requestParameter.get("schema");
                 var type = (String) schema.get("type");
                 var enumValues = (List<Object>) schema.get("enum");
+                var ref = (String) schema.get("$ref");
+
+                var refEnum = getRefEnum(ref, context);
+                // 判斷是不是 ENUM
+                if (refEnum != null) {
+                    type = refEnum.getType();
+                    enumValues = refEnum.getEnumValues();
+                }
 
                 if ("array".equals(type)) {
                     var items = (LinkedHashMap<?, ?>) schema.get("items");
-                    var itemsType = items.get("type");
+                    var itemsType = (String)items.get("type");
+                    var itemsRef = (String) items.get("$ref");
+                    var itemsRefEnum = getRefEnum(itemsRef, context);
+                    // 判斷是不是 ENUM
+                    if (itemsRefEnum != null) {
+                        itemsType = itemsRefEnum.getType();
+                        enumValues = itemsRefEnum.getEnumValues();
+                    }
                     type = "array[%s]".formatted(itemsType);
                 }
 
