@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @Data
 public class SheetParameter {
+    int index;
     String path;
     String summary;
     String httpMethod;

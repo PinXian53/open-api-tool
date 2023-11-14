@@ -87,10 +87,12 @@ public class SheetService {
 
     private List<SheetParameter> convertToSheetParameter(OpenApiDoc openApiDoc) {
         var sheetParameterList = new ArrayList<SheetParameter>();
-        openApiDoc.getGroups().forEach(group ->
-            group.getApis().forEach(api -> {
+        int index = 1;
+        for (Group group : openApiDoc.getGroups()) {
+            for (Api api : group.getApis()) {
                 var otherParameterList = getOtherParameters(api);
                 var sheetParameter = new SheetParameter();
+                sheetParameter.setIndex(index);
                 sheetParameter.setPath(api.getPath());
                 sheetParameter.setSummary(api.getSummary());
                 sheetParameter.setHttpMethod(api.getHttpMethod());
@@ -101,8 +103,9 @@ public class SheetService {
                 setResponseParametersAndExample(sheetParameter, api.getResponsePayloads());
                 setShow(sheetParameter);
                 sheetParameterList.add(sheetParameter);
-            })
-        );
+                index++;
+            }
+        }
         return sheetParameterList;
     }
 
