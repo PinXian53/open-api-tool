@@ -249,8 +249,14 @@ public class OpenApiSpecService {
                 if (itemsRef == null) {
                     type = "array[%s]".formatted(itemsType);
                 } else {
-                    type = "array[object]";
-                    subRef = itemsRef;
+                    var subRefEnum = getRefEnum(itemsRef, context);
+                    if (subRefEnum != null) {
+                        type = "array[%s]".formatted(subRefEnum.getType());
+                        enumValue = subRefEnum.getEnumValues();
+                    }else {
+                        type = "array[object]";
+                        subRef = itemsRef;
+                    }
                 }
             }
 

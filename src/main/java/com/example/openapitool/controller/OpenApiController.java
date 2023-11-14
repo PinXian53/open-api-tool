@@ -19,14 +19,14 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @Tag(name = "open api")
 @RestController
-@RequestMapping("api/openApi")
+@RequestMapping("api/open-api/excel")
 public class OpenApiController {
 
     private final SheetService sheetService;
 
     @SneakyThrows
     @Operation(summary = "Convert Open Api To Excel (file)")
-    @PostMapping(value = "file/toExcel" ,name = "convert open api file to excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "file" ,name = "convert open api file to excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void convertOpenApiToExcel(
         @Parameter(description = "Template Type")
         @RequestParam(required = false) TemplateType templateType,
@@ -40,7 +40,7 @@ public class OpenApiController {
 
     @SneakyThrows
     @Operation(summary = "Convert Open Api To Excel (url)")
-    @PostMapping(value = "url/toExcel" ,name = "convert open api url to excel")
+    @PostMapping(value = "url" ,name = "convert open api url to excel")
     public void convertOpenApiToExcel(
         @Parameter(description = "Template Type")
         @RequestParam(required = false) TemplateType templateType,
