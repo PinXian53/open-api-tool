@@ -296,6 +296,11 @@ public class OpenApiSpecService {
                 if (format != null) {
                     type = "%s($%s)".formatted(type, format);
                 }
+                if (type == null && property.get("oneOf") != null) {
+                    // oneOf 比較複雜，先不實作，固定傳 object
+                    type = "object";
+                }
+
                 var parameter = new Parameter();
                 parameter.setSequence(seq);
                 parameter.setName(fieldName);
