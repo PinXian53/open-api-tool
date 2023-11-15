@@ -92,7 +92,7 @@ public class OpenApiSpecService {
                 var request = new RequestPayload();
                 request.setMediaType(mediaType);
                 request.setRef(ref);
-                request.setParameters(getPayloadParameter(ref, null, null, context));
+                request.setParameters(getPayloadParameter(ref, null, null, null, context));
                 setRequestPayloadExample(request, examples);
                 requestPayloads.add(request);
             });
@@ -124,7 +124,7 @@ public class OpenApiSpecService {
 
                 if ("array".equals(type)) {
                     var items = (LinkedHashMap<?, ?>) schema.get("items");
-                    var itemsType = (String)items.get("type");
+                    var itemsType = (String) items.get("type");
                     var itemsRef = (String) items.get("$ref");
                     var itemsRefEnum = getRefEnum(itemsRef, context);
                     // 判斷是不是 ENUM
@@ -188,7 +188,7 @@ public class OpenApiSpecService {
                         response.setMediaType(mediaType);
                         response.setHttpCode(status);
                         response.setRef(ref);
-                        response.setParameters(getPayloadParameter(ref, null, null, context));
+                        response.setParameters(getPayloadParameter(ref, null, null, null, context));
                         responseList.add(response);
                     });
                 } else {
@@ -220,24 +220,32 @@ public class OpenApiSpecService {
 
     private List<Parameter> getPayloadParameter(
         String ref,
+        LinkedHashMap<String, LinkedHashMap<String, ?>> properties,
         String parentRef,
         String parentSeq,
         DocumentContext context) {
-        if (ref == null || ref.equals(parentRef)) {
+        if (ref == null && properties == null) {
+            return Collections.emptyList();
+        }
+
+        if (ref != null && ref.equals(parentRef)) {
             // ref 等於 parentRef 就跳過，避免無限迴圈造成 StackOverflowError
             return Collections.emptyList();
         }
 
-        var jsonPath = refToJsonPath(ref);
-        var components = (LinkedHashMap<String, ?>) context.read(jsonPath);
+        List<String> requiredFieldName = null;
+        if (ref != null) {
+            var jsonPath = refToJsonPath(ref);
+            var components = (LinkedHashMap<String, ?>) context.read(jsonPath);
+            requiredFieldName = (List<String>) components.get("required");
+            properties = (LinkedHashMap<String, LinkedHashMap<String, ?>>) components.get("properties");
+        }
 
-        var requiredFieldName = (List<String>) components.get("required");
-        var parameterList = new ArrayList<Parameter>();
-
-        var properties = (LinkedHashMap<String, LinkedHashMap<String, ?>>) components.get("properties");
         if (properties == null) {
             return Collections.emptyList();
         }
+
+        var parameterList = new ArrayList<Parameter>();
 
         int index = 1;
 
@@ -273,7 +281,7 @@ public class OpenApiSpecService {
                     if (subRefEnum != null) {
                         type = "array[%s]".formatted(subRefEnum.getType());
                         enumValue = subRefEnum.getEnumValues();
-                    }else {
+                    } else {
                         type = "array[object]";
                         subRef = itemsRef;
                     }
@@ -297,6 +305,11 @@ public class OpenApiSpecService {
                 parameter.setEnumValues(enumValue);
                 parameter.setExample(example);
                 parameterList.add(parameter);
+
+                if ("object".equals(type)) {
+                    var subProperties = (LinkedHashMap<String, LinkedHashMap<String, ?>>) property.get("properties");
+                    parameterList.addAll(getPayloadParameter(null, subProperties, ref, seq, context));
+                }
             } else {
                 var parameter = new Parameter();
                 parameter.setSequence(seq);
@@ -306,7 +319,7 @@ public class OpenApiSpecService {
                 parameter.setRequired(required);
                 parameter.setExample(example);
                 parameterList.add(parameter);
-                parameterList.addAll(getPayloadParameter(subRef, ref, seq, context));
+                parameterList.addAll(getPayloadParameter(subRef, null, ref, seq, context));
             }
             index++;
         }
